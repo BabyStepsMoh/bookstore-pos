@@ -1,3 +1,4 @@
+# ...existing code...
 import os
 import json
 from datetime import datetime
@@ -42,7 +43,8 @@ for i, (item, price) in enumerate(item_catalog.items(), 1):
 print("\nEnter 'done' when you're finished.\n")
 
 # Purchases
-purchases = []
+# Use a dict to aggregate quantities for the same item (prevent duplicates)
+purchases = {}  # item_name -> {'price': unit_price, 'qty': total_qty}
 item_names = list(item_catalog)
 while True:
     choice = input("Enter item number or 'done': ").strip()
@@ -66,15 +68,19 @@ while True:
         print(f"Only {item_stock[item]} left.")
         continue
 
+    # Deduct stock and aggregate purchase quantity
     item_stock[item] -= qty
-    purchases.append((item, item_catalog[item], qty))
+    if item in purchases:
+        purchases[item]['qty'] += qty
+    else:
+        purchases[item] = {'price': item_catalog[item], 'qty': qty}
 
 if not purchases:
     print("No items selected. Exiting.")
     exit()
 
 # Receipt
-total = sum(p * q for _, p, q in purchases)
+total = sum(data['price'] * data['qty'] for data in purchases.values())
 lines = [
     "ABC SUPREME GROUP OF SCHOOLS".center(LINE_WIDTH),
     "SCHOOL BOOKSTORE".center(LINE_WIDTH),
@@ -84,8 +90,10 @@ lines = [
     f"{'ITEM':16}{'QTY':<4}{'UNIT':<7}{'TOTAL':<5}"
 ]
 
-# Add purchased items
-for name, price, qty in purchases:
+# Add purchased items (now aggregated, no duplicates)
+for name, data in purchases.items():
+    price = data['price']
+    qty = data['qty']
     lines.append(f"{name:16}{qty:<4}N{price:<6}N{price*qty:<5}")
 
 # Footer
@@ -107,3 +115,4 @@ with open(stock_file, "w") as f:
 
 print(f"\n Receipt saved to {filename}")
 print("\n=== RECEIPT ===\n" + receipt_text)
+# ...existing code...
