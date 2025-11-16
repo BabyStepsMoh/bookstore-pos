@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 
 # POS settings
+# Had to create this variable because the printer has a character limit
 LINE_WIDTH = 32  # Adjust to your printer width
 
 # Catalog and stock
